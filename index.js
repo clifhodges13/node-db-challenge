@@ -11,8 +11,16 @@ server.get('/', (req, res) => res.send('Welcome'));
 
 // Get all projects
 server.get('/projects', async (req, res) => {
+  const projects = await db('Projects')
   try {
-    res.status(201).json(await db('Projects'))
+    res.status(200).json(projects.map(proj => {
+      return {
+        id: proj.id,
+        Name: proj.Name,
+        Description: proj.Description,
+        Completed: `${proj.Completed === 1 ? 'true' : 'false'}`
+      }
+    }))
   } catch(err) {
     res.status(500).json({message: 'Server error.'})
   }
@@ -78,6 +86,34 @@ server.post('/tasks', async (req, res) => {
   }
   try {
     res.status(201).json(await db('Tasks').insert(req.body))
+  } catch(err) {
+    res.status(500).json({message: 'Server error.'})
+  }
+})
+
+// Get a Project by Id
+server.get('/projects/:id', async (req, res) => {
+  try {
+    // const project_id = req.params.id
+    // const project = await db('Projects').where({ id: project_id })
+    // if (!project) {
+    //   res.status(404).json({ message: 'The project with the specified id does not exist.' })
+    // }
+    // const tasks = await db('Tasks').where({ Project_Id: id })
+    // const resources = await db('Projects_Resources').where({ Project_Id: id })
+    // console.log(project)
+    // res.status(200).json({
+    //   project: {
+    //     id: project.id,
+    //     name: project.Name,
+    //     description: project.Description,
+    //     Completed: `${project.Completed === 0 ? 'false': 'true'}`,
+    //     tasks,
+    //     resources
+    //   }
+    // })
+    const project = await db('Projects').where({ id: req.params.id })
+    res.json(project)
   } catch(err) {
     res.status(500).json({message: 'Server error.'})
   }
